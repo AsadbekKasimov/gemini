@@ -87,7 +87,7 @@ class TelegramAuth {
         // Если initData пустая, значит мы не в Телеграм -> используем ваш ID
         if (!this.tg.initData) {
             console.warn('⚠️ Запущено вне Telegram! Использую тестовый ID для отладки.');
-            return 945603100; // ВАШ ID (удалите эту строку перед финальным релизом, если нужно)
+            
         }
 
         return null;

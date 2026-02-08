@@ -8,6 +8,28 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+// ===== ПОЛУЧЕНИЕ USER_ID ИЗ URL =====
+function getUserIdFromUrl() {
+    // Способ 1: Из URL параметра
+    const urlParams = new URLSearchParams(window.location.search);
+    const userIdFromUrl = urlParams.get('user_id');
+    if (userIdFromUrl) {
+        console.log('✅ user_id получен из URL:', userIdFromUrl);
+        return parseInt(userIdFromUrl);
+    }
+    
+    // Способ 2: Из initDataUnsafe (если есть)
+    if (tg.initDataUnsafe?.user?.id) {
+        console.log('✅ user_id получен из initDataUnsafe:', tg.initDataUnsafe.user.id);
+        return tg.initDataUnsafe.user.id;
+    }
+    
+    console.error('❌ Не удалось получить user_id!');
+    return 0;
+}
+
+const currentUserId = getUserIdFromUrl();
+console.log('📍 Текущий user_id:', currentUserId);
 
 
 const productsData = {
@@ -795,7 +817,7 @@ function confirmCheckout() {
             image: item.image  // ДОБАВЛЕНО: Включаем URL изображения в данные заказа
         })),
         total: total,
-        user_id: tg.initDataUnsafe?.user?.id || 0
+        user_id: currentUserId  // ✅ ИСПРАВЛЕНО: Используем user_id из URL
     };
     
     // Send data back to bot

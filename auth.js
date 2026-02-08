@@ -1,6 +1,7 @@
-/**
+
  * Система авторизации для Telegram Web App
  * Проверяет chat ID пользователя по Google Sheets
+ * ИСПРАВЛЕНА ПРОБЛЕМА С ПОЛУЧЕНИЕМ CHAT_ID
  */
 
 class TelegramAuth {
@@ -61,11 +62,79 @@ class TelegramAuth {
     }
 
     /**
+     * УЛУЧШЕННОЕ получение Chat ID пользователя
+     * Пробует несколько способов получения данных
+     */
+    getUserChatId() {
+        this.log('info', 'Попытка получить chat_id пользователя');
+        
+        // СПОСОБ 1: Из initDataUnsafe.user.id (стандартный)
+        if (this.tg.initDataUnsafe?.user?.id) {
+            const chatId = this.tg.initDataUnsafe.user.id;
+            this.log('info', 'Chat ID получен из initDataUnsafe.user.id', chatId);
+            return chatId;
+        }
+        
+        // СПОСОБ 2: Из initDataUnsafe.user (без .id)
+        if (this.tg.initDataUnsafe?.user) {
+            const user = this.tg.initDataUnsafe.user;
+            this.log('debug', 'Объект user:', user);
+            
+            // Пробуем разные варианты полей
+            if (user.id) return user.id;
+            if (user.chat_id) return user.chat_id;
+            if (user.user_id) return user.user_id;
+        }
+        
+        // СПОСОБ 3: Парсинг из initData (raw строка)
+        if (this.tg.initData) {
+            try {
+                const params = new URLSearchParams(this.tg.initData);
+                const userJson = params.get('user');
+                if (userJson) {
+                    const user = JSON.parse(userJson);
+                    if (user.id) {
+                        this.log('info', 'Chat ID получен из initData (raw)', user.id);
+                        return user.id;
+                    }
+                }
+            } catch (e) {
+                this.log('warn', 'Ошибка парсинга initData', e);
+            }
+        }
+        
+        // СПОСОБ 4: Из URL параметров (если бот передает)
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatIdFromUrl = urlParams.get('chat_id') || urlParams.get('user_id');
+        if (chatIdFromUrl) {
+            this.log('info', 'Chat ID получен из URL параметров', chatIdFromUrl);
+            return chatIdFromUrl;
+        }
+        
+        // СПОСОБ 5: Из глобальных переменных Telegram
+        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+            return window.Telegram.WebApp.initDataUnsafe.user.id;
+        }
+        
+        this.log('error', 'Не удалось получить chat_id ни одним из способов');
+        this.log('debug', 'Telegram WebApp данные:', {
+            initDataUnsafe: this.tg.initDataUnsafe,
+            initData: this.tg.initData,
+            isVersionAtLeast: this.tg.isVersionAtLeast,
+            platform: this.tg.platform
+        });
+        
+        return null;
+    }
+
+    /**
      * Инициализация и проверка авторизации
      */
     async init() {
         try {
             this.log('info', 'Инициализация системы авторизации');
+            this.log('info', 'Telegram WebApp version:', this.tg.version);
+            this.log('info', 'Platform:', this.tg.platform);
             
             // Показываем loader
             this.showLoader();
@@ -85,17 +154,19 @@ class TelegramAuth {
                 this.userChatId = devMode.TEST_CHAT_ID;
                 this.log('warn', 'Режим разработки: используется тестовый chat ID', this.userChatId);
             } else {
-                this.userChatId = this.tg.initDataUnsafe?.user?.id;
+                // ИСПОЛЬЗУЕМ УЛУЧШЕННУЮ ФУНКЦИЮ
+                this.userChatId = this.getUserChatId();
             }
 
             if (!this.userChatId) {
                 const errorMsg = this.getMessage('ERROR_NO_USER_DATA', 'Не удалось получить данные пользователя');
                 this.log('error', errorMsg);
+                this.log('error', 'Telegram WebApp полные данные:', this.tg);
                 this.showError(errorMsg);
                 return false;
             }
             
-            this.log('info', 'Chat ID получен', this.userChatId);
+            this.log('info', 'Chat ID получен успешно:', this.userChatId);
 
             // Проверяем авторизацию
             const isAuth = await this.checkAuthorization(this.userChatId);

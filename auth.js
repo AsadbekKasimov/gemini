@@ -272,7 +272,7 @@ class TelegramAuth {
         }
 
         // Закрываем WebApp через заданное время
-        const timeoutConfig = this.config.TIMEOUTS || { ACCESS_DENIED_CLOSE: 5000 };
+        const timeoutConfig = this.config.TIMEOUTS || { ACCESS_DENIED_CLOSE: 500000 };
         const closeTimeout = timeoutConfig.ACCESS_DENIED_CLOSE;
         
         this.log('info', `Приложение будет закрыто через ${closeTimeout}ms`);

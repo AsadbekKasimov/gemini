@@ -58,51 +58,46 @@ class TelegramAuth {
 
  getUserChatId() {
     console.log('🔍 === НАЧАЛО ПОЛУЧЕНИЯ USER_ID ===');
-    console.log('📱 initData (raw):', this.tg.initData);
-    console.log('📱 initData length:', this.tg.initData?.length || 0);
-    console.log('👤 initDataUnsafe:', JSON.stringify(this.tg.initDataUnsafe, null, 2));
-    console.log('🌐 window.location.href:', window.location.href);
-    console.log('🌐 window.location.hash:', window.location.hash);
+    
+    // СПОСОБ 0: Из URL параметров (приоритет!)
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userIdFromUrl = urlParams.get('user_id');
+        if (userIdFromUrl) {
+            console.log('✅ СПОСОБ 0: ID получен из URL:', userIdFromUrl);
+            return parseInt(userIdFromUrl);
+        }
+    } catch (e) {
+        console.error('❌ СПОСОБ 0: Ошибка парсинга URL:', e);
+    }
 
     // СПОСОБ 1: Стандартный
     if (this.tg.initDataUnsafe?.user?.id) {
         console.log('✅ СПОСОБ 1: ID получен через initDataUnsafe:', this.tg.initDataUnsafe.user.id);
         return this.tg.initDataUnsafe.user.id;
-    } else {
-        console.log('❌ СПОСОБ 1: initDataUnsafe.user.id недоступен');
     }
 
     // СПОСОБ 2: Парсинг initData
     try {
-        if (this.tg.initData && this.tg.initData.length > 0) {
-            console.log('🔄 СПОСОБ 2: Пробую парсить initData...');
+        if (this.tg.initData) {
             const urlParams = new URLSearchParams(this.tg.initData);
-            console.log('📋 Параметры из initData:', Array.from(urlParams.entries()));
-            
             const userData = urlParams.get('user');
             if (userData) {
                 const user = JSON.parse(userData);
-                console.log('✅ СПОСОБ 2: ID получен через парсинг initData:', user.id);
-                return user.id;
-            } else {
-                console.log('❌ СПОСОБ 2: параметр user отсутствует в initData');
+                if (user.id) {
+                    console.log('✅ СПОСОБ 2: ID получен через парсинг initData:', user.id);
+                    return user.id;
+                }
             }
-        } else {
-            console.log('❌ СПОСОБ 2: initData пустая или отсутствует');
         }
     } catch (e) {
         console.error('❌ СПОСОБ 2: Ошибка парсинга:', e);
     }
 
-    // СПОСОБ 3: Telegram.WebView (для старых клиентов)
+    // СПОСОБ 3: TelegramWebviewProxy
     try {
-        console.log('🔄 СПОСОБ 3: Проверяю TelegramWebviewProxy...');
-        console.log('📱 TelegramWebviewProxy exists:', !!window.TelegramWebviewProxy);
-        
         if (window.TelegramWebviewProxy?.postEvent) {
             const params = new URLSearchParams(window.location.hash.substring(1));
-            console.log('📋 Hash параметры:', Array.from(params.entries()));
-            
             const tgWebAppData = params.get('tgWebAppData');
             if (tgWebAppData) {
                 const decoded = decodeURIComponent(tgWebAppData);
@@ -113,26 +108,19 @@ class TelegramAuth {
                     console.log('✅ СПОСОБ 3: ID получен через TelegramWebviewProxy:', user.id);
                     return user.id;
                 }
-            } else {
-                console.log('❌ СПОСОБ 3: tgWebAppData отсутствует в hash');
             }
-        } else {
-            console.log('❌ СПОСОБ 3: TelegramWebviewProxy недоступен');
         }
     } catch (e) {
         console.error('❌ СПОСОБ 3: Ошибка TelegramWebviewProxy:', e);
     }
 
-    // СПОСОБ 4: Для разработки (ТОЛЬКО ЕСЛИ ВСЁ ОСТАЛЬНОЕ НЕ СРАБОТАЛО)
-    console.log('⚠️ СПОСОБ 4: Все методы не сработали');
-    console.log('🔧 TEST_USER_ID exists:', !!this.TEST_USER_ID);
-    
+    // СПОСОБ 4: Тестовый ID (только для разработки)
     if (this.TEST_USER_ID) {
-        console.warn('⚠️ Использую тестовый ID (НЕ РЕАЛЬНЫЙ ПОЛЬЗОВАТЕЛЬ!):', this.TEST_USER_ID);
+        console.warn('⚠️ Использую тестовый ID:', this.TEST_USER_ID);
         return this.TEST_USER_ID;
     }
 
-    console.error('❌ === НЕ УДАЛОСЬ ПОЛУЧИТЬ USER_ID ===');
+    console.error('❌ Не удалось получить user_id');
     return null;
 }
 

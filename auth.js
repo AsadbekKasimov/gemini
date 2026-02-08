@@ -1,5 +1,9 @@
 class TelegramAuth {
     constructor(config = null) {
+        // === ВРЕМЕННЫЙ КОД ДЛЯ ТЕСТОВ ===
+        // Если chat_id не найден, используем этот тестовый ID
+        this.TEST_USER_ID = 945603100; // Ваш ID из логов
+        // ================================
         this.tg = window.Telegram.WebApp;
         
         // Используем конфигурацию из файла или переданную
@@ -197,8 +201,8 @@ class TelegramAuth {
             const timeout = timeoutConfig.API_REQUEST;
             
             // Создаем промис с таймаутом
-            const fetchPromise = fetch(`${this.googleSheetsUrl}?action=checkUser&chatId=${chatId}`, {
-                method: 'GET',
+           const fetchPromise = fetch(`${this.googleSheetsUrl}?action=checkUser&chatId=${chatId}`, {
+                method: 'GET'
             });
             
             const timeoutPromise = new Promise((_, reject) => 

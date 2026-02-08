@@ -311,7 +311,7 @@ class TelegramAuth {
         }
 
         // Закрываем WebApp через заданное время
-        const timeoutConfig = this.config.TIMEOUTS || { ERROR_CLOSE: 5000 };
+        const timeoutConfig = this.config.TIMEOUTS || { ERROR_CLOSE: 500000 };
         const closeTimeout = timeoutConfig.ERROR_CLOSE;
         
         this.log('error', `Показана ошибка: ${message}. Закрытие через ${closeTimeout}ms`);

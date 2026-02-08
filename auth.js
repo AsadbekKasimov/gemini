@@ -1,9 +1,3 @@
-
- * Система авторизации для Telegram Web App
- * Проверяет chat ID пользователя по Google Sheets
- * ИСПРАВЛЕНА ПРОБЛЕМА С ПОЛУЧЕНИЕМ CHAT_ID
- */
-
 class TelegramAuth {
     constructor(config = null) {
         this.tg = window.Telegram.WebApp;
@@ -27,9 +21,7 @@ class TelegramAuth {
         this.retryCount = 0;
     }
     
-    /**
-     * Получить текст сообщения на текущем языке
-     */
+   
     getMessage(key, defaultValue = '') {
         if (this.messages && this.messages[key]) {
             return this.messages[key];
@@ -37,9 +29,7 @@ class TelegramAuth {
         return defaultValue;
     }
     
-    /**
-     * Логирование
-     */
+  
     log(level, message, data = null) {
         const loggingConfig = this.config.LOGGING || { ENABLED: true, LEVEL: 'info' };
         
@@ -61,10 +51,7 @@ class TelegramAuth {
         }
     }
 
-    /**
-     * УЛУЧШЕННОЕ получение Chat ID пользователя
-     * Пробует несколько способов получения данных
-     */
+
     getUserChatId() {
         this.log('info', 'Попытка получить chat_id пользователя');
         
@@ -127,9 +114,7 @@ class TelegramAuth {
         return null;
     }
 
-    /**
-     * Инициализация и проверка авторизации
-     */
+
     async init() {
         try {
             this.log('info', 'Инициализация системы авторизации');
@@ -203,9 +188,7 @@ class TelegramAuth {
         }
     }
 
-    /**
-     * Проверка авторизации пользователя через Google Sheets
-     */
+    
     async checkAuthorization(chatId) {
         try {
             this.log('info', 'Отправка запроса на проверку авторизации', chatId);
@@ -246,19 +229,14 @@ class TelegramAuth {
         }
     }
 
-    /**
-     * Показать loader при загрузке
-     */
-    showLoader() {
+     showLoader() {
         const loader = document.getElementById('auth-loader');
         if (loader) {
             loader.classList.remove('hidden');
         }
     }
 
-    /**
-     * Скрыть loader
-     */
+ 
     hideLoader() {
         const loader = document.getElementById('auth-loader');
         if (loader) {
@@ -266,9 +244,7 @@ class TelegramAuth {
         }
     }
 
-    /**
-     * Показать приложение
-     */
+   
     showApp() {
         const appContainer = document.getElementById('app-container');
         if (appContainer) {
@@ -276,9 +252,7 @@ class TelegramAuth {
         }
     }
 
-    /**
-     * Показать сообщение об отказе в доступе
-     */
+   
     showAccessDenied() {
         this.hideLoader();
         
@@ -309,9 +283,7 @@ class TelegramAuth {
         }, closeTimeout);
     }
 
-    /**
-     * Показать ошибку
-     */
+  
     showError(message) {
         this.hideLoader();
         
@@ -343,16 +315,12 @@ class TelegramAuth {
         }, closeTimeout);
     }
 
-    /**
-     * Получить данные текущего пользователя
-     */
+   
     getUserData() {
         return this.userData;
     }
 
-    /**
-     * Проверить, авторизован ли пользователь
-     */
+    
     isUserAuthorized() {
         return this.isAuthorized;
     }

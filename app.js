@@ -8,6 +8,9 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+// Скрываем MainButton по умолчанию
+tg.MainButton.hide();
+
 // ===== ПОЛУЧЕНИЕ USER_ID ИЗ URL =====
 function getUserIdFromUrl() {
     // Способ 1: Из URL параметра
@@ -807,41 +810,56 @@ function closeConfirmationDialog() {
 function confirmCheckout() {
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    // Prepare order data - ИЗМЕНЕНО: Теперь включаем URL изображения
+    // Prepare order data
     const orderData = {
         items: cart.map(item => ({
             id: item.id,
             name: item.name,
             price: item.price,
             qty: item.quantity,
-            image: item.image  // ДОБАВЛЕНО: Включаем URL изображения в данные заказа
+            image: item.image
         })),
         total: total,
-        user_id: currentUserId  // ✅ ИСПРАВЛЕНО: Используем user_id из URL
+        user_id: currentUserId
     };
     
-    // Send data back to bot
-    tg.sendData(JSON.stringify(orderData));
+    console.log('📦 Подготовлены данные заказа:', orderData);
     
-    // Save order to localStorage for history
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    orders.unshift({
-        id: Date.now(),
-        date: new Date().toLocaleDateString('ru-RU'),
-        total: total,
-        items: cart.length
+    // ✅ ПРАВИЛЬНЫЙ СПОСОБ: Используем MainButton
+    // Сохраняем данные заказа
+    window.orderDataToSend = orderData;
+    
+    // Показываем MainButton
+    tg.MainButton.text = "Отправить заказ";
+    tg.MainButton.show();
+    tg.MainButton.enable();
+    
+    // Обработчик нажатия на MainButton
+    tg.MainButton.onClick(function() {
+        console.log('🚀 Отправка заказа в бота...');
+        tg.sendData(JSON.stringify(window.orderDataToSend));
+        
+        // Save order to localStorage for history
+        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+        orders.unshift({
+            id: Date.now(),
+            date: new Date().toLocaleDateString('ru-RU'),
+            total: total,
+            items: cart.length
+        });
+        localStorage.setItem('orders', JSON.stringify(orders));
+        
+        // Clear cart
+        cart = [];
+        saveCart();
+        updateCartBadge();
+        
+        // Close WebApp
+        tg.close();
     });
-    localStorage.setItem('orders', JSON.stringify(orders));
-    
-    // Clear cart
-    cart = [];
-    saveCart();
-    updateCartBadge();
     
     // Close confirmation dialog
     closeConfirmationDialog();
-    
-    tg.close();
 }
 
 // Utils

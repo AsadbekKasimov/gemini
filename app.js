@@ -1,3 +1,4 @@
+(() => {
 let currentProduct = null;
 let modalMode = 'catalog'; // catalog | cart
 let currentCartIndex = null;
@@ -880,3 +881,5 @@ document.addEventListener('click', e => {
     if (!img) return;
     img.classList.toggle('zoomed');
 });
+
+ })();

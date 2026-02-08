@@ -1,9 +1,9 @@
 class TelegramAuth {
-    constructor(config = null) {
-        // === ВРЕМЕННЫЙ КОД ДЛЯ ТЕСТОВ ===
-        // Если chat_id не найден, используем этот тестовый ID
-        this.TEST_USER_ID = 945603100; // Ваш ID из логов
-        // ================================
+   constructor(config = null) {
+        // === ТЕСТОВЫЙ КОД УДАЛЕН ИЛИ ЗАКОММЕНТИРОВАН ===
+        // this.TEST_USER_ID = 945603100; 
+        // ===============================================
+
         this.tg = window.Telegram.WebApp;
         
         // Используем конфигурацию из файла или переданную
@@ -56,71 +56,42 @@ class TelegramAuth {
     }
 
 
-    getUserChatId() {
-        return 945603100;
-       /* this.log('info', 'Попытка получить chat_id пользователя');
-        
-        // СПОСОБ 1: Из initDataUnsafe.user.id (стандартный)
+   getUserChatId() {
+        // Логируем для проверки (потом можно убрать)
+        console.log('Пробую получить user_id...');
+
+        // СПОСОБ 1: Стандартный (через объект WebApp)
         if (this.tg.initDataUnsafe?.user?.id) {
-            const chatId = this.tg.initDataUnsafe.user.id;
-            this.log('info', 'Chat ID получен из initDataUnsafe.user.id', chatId);
-            return chatId;
+            console.log('ID получен через initDataUnsafe');
+            return this.tg.initDataUnsafe.user.id;
         }
-        
-        // СПОСОБ 2: Из initDataUnsafe.user (без .id)
-        if (this.tg.initDataUnsafe?.user) {
-            const user = this.tg.initDataUnsafe.user;
-            this.log('debug', 'Объект user:', user);
-            
-            // Пробуем разные варианты полей
-            if (user.id) return user.id;
-            if (user.chat_id) return user.chat_id;
-            if (user.user_id) return user.user_id;
-        }
-        
-        // СПОСОБ 3: Парсинг из initData (raw строка)
-        if (this.tg.initData) {
-            try {
-                const params = new URLSearchParams(this.tg.initData);
-                const userJson = params.get('user');
-                if (userJson) {
-                    const user = JSON.parse(userJson);
+
+        // СПОСОБ 2: Парсинг "сырой" строки initData (резервный)
+        try {
+            if (this.tg.initData) {
+                const urlParams = new URLSearchParams(this.tg.initData);
+                const userData = urlParams.get('user');
+                if (userData) {
+                    const user = JSON.parse(userData);
                     if (user.id) {
-                        this.log('info', 'Chat ID получен из initData (raw)', user.id);
+                        console.log('ID получен через парсинг initData');
                         return user.id;
                     }
                 }
-            } catch (e) {
-                this.log('warn', 'Ошибка парсинга initData', e);
             }
+        } catch (e) {
+            console.error('Ошибка парсинга:', e);
         }
-        
-        // СПОСОБ 4: Из URL параметров (если бот передает)
-        const urlParams = new URLSearchParams(window.location.search);
-        const chatIdFromUrl = urlParams.get('chat_id') || urlParams.get('user_id');
-        if (chatIdFromUrl) {
-            this.log('info', 'Chat ID получен из URL параметров', chatIdFromUrl);
-            return chatIdFromUrl;
-        }
-        
-        // СПОСОБ 5: Из глобальных переменных Telegram
-        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-            return window.Telegram.WebApp.initDataUnsafe.user.id;
-        }
-        
-        
-        this.log('error', 'Не удалось получить chat_id ни одним из способов');
-        this.log('debug', 'Telegram WebApp данные:', {
-            initDataUnsafe: this.tg.initDataUnsafe,
-            initData: this.tg.initData,
-            isVersionAtLeast: this.tg.isVersionAtLeast,
-            platform: this.tg.platform
-        });
-        
-        return null;
-     */
-    }
 
+        // СПОСОБ 3: Для тестов на компьютере (если открыли просто ссылку в браузере)
+        // Если initData пустая, значит мы не в Телеграм -> используем ваш ID
+        if (!this.tg.initData) {
+            console.warn('⚠️ Запущено вне Telegram! Использую тестовый ID для отладки.');
+            return 945603100; // ВАШ ID (удалите эту строку перед финальным релизом, если нужно)
+        }
+
+        return null;
+    }
 
     async init() {
         try {

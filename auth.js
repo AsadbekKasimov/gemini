@@ -57,7 +57,8 @@ class TelegramAuth {
 
 
     getUserChatId() {
-        this.log('info', 'Попытка получить chat_id пользователя');
+        return 945603100;
+       /* this.log('info', 'Попытка получить chat_id пользователя');
         
         // СПОСОБ 1: Из initDataUnsafe.user.id (стандартный)
         if (this.tg.initDataUnsafe?.user?.id) {
@@ -107,6 +108,7 @@ class TelegramAuth {
             return window.Telegram.WebApp.initDataUnsafe.user.id;
         }
         
+        
         this.log('error', 'Не удалось получить chat_id ни одним из способов');
         this.log('debug', 'Telegram WebApp данные:', {
             initDataUnsafe: this.tg.initDataUnsafe,
@@ -116,6 +118,7 @@ class TelegramAuth {
         });
         
         return null;
+     */
     }
 
 

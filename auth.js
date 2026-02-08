@@ -216,9 +216,6 @@ class TelegramAuth {
             // Создаем промис с таймаутом
             const fetchPromise = fetch(`${this.googleSheetsUrl}?action=checkUser&chatId=${chatId}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
             });
             
             const timeoutPromise = new Promise((_, reject) => 

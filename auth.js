@@ -1,7 +1,7 @@
 class TelegramAuth {
    constructor(config = null) {
         // === ТЕСТОВЫЙ КОД УДАЛЕН ИЛИ ЗАКОММЕНТИРОВАН ===
-         this.TEST_USER_ID = 945603100; 
+         // this.TEST_USER_ID = 945603100; 
         // ===============================================
 
         this.tg = window.Telegram.WebApp;

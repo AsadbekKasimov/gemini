@@ -1,7 +1,7 @@
 class TelegramAuth {
    constructor(config = null) {
         // === ТЕСТОВЫЙ КОД УДАЛЕН ИЛИ ЗАКОММЕНТИРОВАН ===
-        // this.TEST_USER_ID = 945603100; 
+         this.TEST_USER_ID = 945603100; 
         // ===============================================
 
         this.tg = window.Telegram.WebApp;
@@ -57,41 +57,62 @@ class TelegramAuth {
 
 
    getUserChatId() {
-        // Логируем для проверки (потом можно убрать)
-        console.log('Пробую получить user_id...');
+    console.log('🔍 Пробую получить user_id...');
+    console.log('📱 initData:', this.tg.initData);
+    console.log('👤 initDataUnsafe:', this.tg.initDataUnsafe);
 
-        // СПОСОБ 1: Стандартный (через объект WebApp)
-        if (this.tg.initDataUnsafe?.user?.id) {
-            console.log('ID получен через initDataUnsafe');
-            return this.tg.initDataUnsafe.user.id;
+    // СПОСОБ 1: Стандартный
+    if (this.tg.initDataUnsafe?.user?.id) {
+        console.log('✅ ID получен через initDataUnsafe:', this.tg.initDataUnsafe.user.id);
+        return this.tg.initDataUnsafe.user.id;
+    }
+
+    // СПОСОБ 2: Парсинг initData
+    try {
+        if (this.tg.initData) {
+            const urlParams = new URLSearchParams(this.tg.initData);
+            const userData = urlParams.get('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                if (user.id) {
+                    console.log('✅ ID получен через парсинг initData:', user.id);
+                    return user.id;
+                }
+            }
         }
+    } catch (e) {
+        console.error('❌ Ошибка парсинга:', e);
+    }
 
-        // СПОСОБ 2: Парсинг "сырой" строки initData (резервный)
+    // СПОСОБ 3: Telegram.WebView (для старых клиентов)
+    if (window.TelegramWebviewProxy?.postEvent) {
         try {
-            if (this.tg.initData) {
-                const urlParams = new URLSearchParams(this.tg.initData);
-                const userData = urlParams.get('user');
-                if (userData) {
-                    const user = JSON.parse(userData);
-                    if (user.id) {
-                        console.log('ID получен через парсинг initData');
-                        return user.id;
-                    }
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const tgWebAppData = params.get('tgWebAppData');
+            if (tgWebAppData) {
+                const decoded = decodeURIComponent(tgWebAppData);
+                const parsed = new URLSearchParams(decoded);
+                const userStr = parsed.get('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    console.log('✅ ID получен через TelegramWebviewProxy:', user.id);
+                    return user.id;
                 }
             }
         } catch (e) {
-            console.error('Ошибка парсинга:', e);
+            console.error('❌ Ошибка TelegramWebviewProxy:', e);
         }
-
-        // СПОСОБ 3: Для тестов на компьютере (если открыли просто ссылку в браузере)
-        // Если initData пустая, значит мы не в Телеграм -> используем ваш ID
-        if (!this.tg.initData) {
-            console.warn('⚠️ Запущено вне Telegram! Использую тестовый ID для отладки.');
-            
-        }
-
-        return null;
     }
+
+    // СПОСОБ 4: Для разработки
+    if (!this.tg.initData && this.TEST_USER_ID) {
+        console.warn('⚠️ Запущено вне Telegram! Использую тестовый ID:', this.TEST_USER_ID);
+        return this.TEST_USER_ID;
+    }
+
+    console.error('❌ Не удалось получить user_id ни одним способом');
+    return null;
+}
 
     async init() {
         try {

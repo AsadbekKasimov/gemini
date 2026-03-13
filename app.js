@@ -2,7 +2,7 @@
 
 let productsData = {};
 let allProducts = [];
-let productsByGroup = {};
+let productsByGroup = {};    
 
 let currentProduct = null;
 let modalMode = 'catalog';
@@ -584,8 +584,8 @@ function renderCart() {
                 <div class="cart-item-name">${product.name}</div>
                <div class="cart-item-meta">
                 Упаковка: ${product.pack_qty || "-"} шт<br>
-                Вес: ${product.weight} × ${cartItem.quantity} = ${itemWeight.toFixed(2)} кг<br>
-                Куб: ${product.cube} × ${cartItem.quantity} = ${itemCube.toFixed(4)} м³
+                Вес: ${itemWeight.toFixed(2)} кг<br>
+                Куб: ${itemCube.toFixed(3)} м³
                 </div>
                 <div class="cart-item-price">
                 ${formatPrice(product.price)} × ${cartItem.quantity} =

@@ -567,6 +567,8 @@ function renderCart() {
         if (!product) return;
 
         const itemTotal = product.price * cartItem.quantity;
+        const itemWeight = (product.weight || 0) * cartItem.quantity;
+        const itemCube = (product.cube || 0) * cartItem.quantity;
         total += itemTotal;
         totalWeight += (product.weight || 0) * cartItem.quantity;
         totalCube += (product.cube || 0) * cartItem.quantity;
@@ -580,10 +582,10 @@ function renderCart() {
             <img src="${cartImage}" class="cart-item-image">
             <div class="cart-item-info">
                 <div class="cart-item-name">${product.name}</div>
-                <div class="cart-item-meta">
+               <div class="cart-item-meta">
                 Упаковка: ${product.pack_qty || "-"} шт<br>
-                Вес: ${product.weight || "-"} кг<br>
-                Куб: ${product.cube || "-"} м³
+                Вес: ${product.weight} × ${cartItem.quantity} = ${itemWeight.toFixed(2)} кг<br>
+                Куб: ${product.cube} × ${cartItem.quantity} = ${itemCube.toFixed(4)} м³
                 </div>
                 <div class="cart-item-price">
                 ${formatPrice(product.price)} × ${cartItem.quantity} =
